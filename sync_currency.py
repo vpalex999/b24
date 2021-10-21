@@ -4,6 +4,10 @@ from contextlib import ContextDecorator
 import bs4
 import requests
 
+# TODO:
+# - Обернуть в Docker
+# - Оформить по документации
+
 TEMPLATE_NAME_PAIR = 'RUB-{}'
 
 logger = logging.getLogger('sync_currency')
@@ -32,7 +36,7 @@ class ProdContext(ContextDecorator):
 
 class B24Repo:
 
-    url = "http://b24.comn"
+    url = "http://b24.com"
 
     def sync_currency(self, currency_pairs: dict) -> None:
         logger.info(f'send to fake API "{self.url}" data currency-pairs: {currency_pairs}')
@@ -40,7 +44,7 @@ class B24Repo:
 
 class CBRRepo:
 
-    url = 'http://www.cbr.ru/scripts1/XML_daily.asp'
+    url = 'http://www.cbr.ru/scripts/XML_daily.asp'
 
     def _request_all_currency(self) -> str:
         response = requests.get(self.url)
