@@ -1,5 +1,5 @@
 FROM python:3.8
 
-COPY . /utils
-RUN pip install -r /utils/requirements.txt
-WORKDIR /utils
+COPY . /b24
+RUN pip install -r /b24/requirements.txt
+WORKDIR /b24/utils/

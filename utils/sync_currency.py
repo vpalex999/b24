@@ -4,19 +4,18 @@ from contextlib import ContextDecorator
 import bs4
 import requests
 
-# TODO:
-# - Обернуть в Docker
-# - Оформить по документации
 
 TEMPLATE_NAME_PAIR = 'RUB-{}'
 
+# Настроить логер
 logger = logging.getLogger('sync_currency')
 logger.level = logging.INFO
 console_hundler = logging.StreamHandler()
 file_hundler = logging.FileHandler('sync_currency.log')
 console_hundler.setLevel(logging.INFO)
 file_hundler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s | %(name)s | %(levelname)s | %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s | %(name)s | %(levelname)s | %(message)s')
 file_hundler.setFormatter(formatter)
 console_hundler.setFormatter(formatter)
 logger.addHandler(console_hundler)
@@ -24,6 +23,8 @@ logger.addHandler(file_hundler)
 
 
 class ProdContext(ContextDecorator):
+    """ Контекстный менеджер для перехвата исключений."""
+
     def __enter__(self):
         return self
 
@@ -35,14 +36,17 @@ class ProdContext(ContextDecorator):
 
 
 class B24Repo:
+    """ заглушка для инстанса Bitrix """
 
     url = "http://b24.com"
 
     def sync_currency(self, currency_pairs: dict) -> None:
-        logger.info(f'send to fake API "{self.url}" data currency-pairs: {currency_pairs}')
+        logger.info(
+            f'send to fake API "{self.url}" data currency-pairs: {currency_pairs}')
 
 
 class CBRRepo:
+    """ Репозиторий Сбера """
 
     url = 'http://www.cbr.ru/scripts/XML_daily.asp'
 
@@ -57,6 +61,7 @@ class CBRRepo:
         return response.text
 
     def get_currency(self) -> dict:
+        """Получить валютные пары"""
         currency_xml = self._request_all_currency()
 
         parser = bs4.BeautifulSoup(currency_xml, features='lxml')
@@ -66,7 +71,8 @@ class CBRRepo:
 
 
 @ProdContext()
-def sync_currency(currency_list, src_repo: CBRRepo, dst_repo) -> bool:
+def sync_currency(currency_list, src_repo: CBRRepo, dst_repo: B24Repo) -> None:
+    """Слой обработчика: Синхронизировать валюту"""
     src_currency = src_repo.get_currency()
 
     selected_pairs = {
@@ -77,6 +83,7 @@ def sync_currency(currency_list, src_repo: CBRRepo, dst_repo) -> bool:
 
 
 if __name__ == "__main__":
+
     currency_list = [
         'RUB-EUR',
         'RUB-USD',
